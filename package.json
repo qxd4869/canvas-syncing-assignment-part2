@@ -1,0 +1,29 @@
+{
+  "name": "canvas-syncing-2",
+  "version": "1.0.0",
+  "description": "Quang_Canvas2",
+  "main": "./src/app.js",
+  "scripts": {
+    "start": "node ./src/app.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"tests complete\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qxd4869/canvas-syncing-assignment-part2.git"
+  },
+  "author": "Quang Dao",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qxd4869/canvas-syncing-assignment-part2/issues"
+  },
+  "homepage": "https://github.com/qxd4869/canvas-syncing-assignment-part2#readme",
+  "devDependencies": {
+    "eslint": "^3.17.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0"
+  },
+  "dependencies": {
+    "socket.io": "^1.7.2"
+  }
+}

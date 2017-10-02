@@ -1,13 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head>      
+      <style>
+        html, body {
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding:0;
+        }
+        canvas {
+          margin: 10px;
+          border: 1px solid black;
+        }
+        p {
+          margin-left: 12px;
+          font-size: 1.2em;
+          width: 50%; 
+        }
+      </style>
     <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script type="text/babel" >
         "use strict";
+        let canvas;
+        let ctx;
+        let socket;
+        
+        //Mouse being dragged with mousedown
+        let dragging;
+        
+        const update = () => { 
+           const data = {
+             height: canvas.height,
+             width: canvas.width,
+             imgData: canvas.toDataURL(), // get pixel data from canvas
+           };
+           socket.emit('draw', data);
+        };
+
+        // mouse functions
+        const doMouseDown = (e) => {
+          
+            dragging = true; 
+
+            console.log("click");
+            //get location of mouse in canvas coordinates
+            let mouse = getMouse(e);
+
+            ctx.beginPath();
+
+            //move pen to x,y of mouse
+            ctx.moveTo(mouse.x,mouse.y);
+            
+        };
+        const doMouseMove = (e) => {
+            
+            // bail out if the mouse button is not down
+            if(!dragging) return;
+        
+            // get location of mouse in canvas coordinates
+            let mouse = getMouse(e);
+            
+            // draw a line to x,y of mouse
+            ctx.lineTo(mouse.x, mouse.y);
+        
+            // stroke the line
+            ctx.stroke();       
+        };
+        
+        const doMouseUp = (e) => {
+            ctx.closePath();      
+            dragging = false;
+        };
+
+        const doMouseOut = (e) => {
+            ctx.closePath();
+            dragging = false;
+        }
+        const setupSocket = () => {
+            
+            socket = io.connect();
+            
+            canvas = document.querySelector('#canvas')
+            ctx = canvas.getContext('2d');
+            canvas.onmousedown = doMouseDown;
+            canvas.onmouseup = doMouseUp;
+            canvas.onmousemove = doMouseMove;
+            canvas.onmouseout = doMouseOut;    
+                               
+                                  
+            // when someone else broadcasts a new rect to the server
+            socket.on('updateCanvas', (data) => {
+                synchImage(data);
+            });
+            
+            //Not sure if I need something here yet
+            socket.on('join', () => {           
+              
+            });
+            
+            setInterval(update, 20);     
+        };
+        
+        // Utility for mouse
+        const getMouse = (e) => {
+            let mouse = {}
+            mouse.x = e.pageX - e.target.offsetLeft;
+            mouse.y = e.pageY - e.target.offsetTop;
+            return mouse;
+        };
+
+        // 
+        const synchImage = (data) =>{
+            let image = new Image();                   
+            image.onload = () => {
+                ctx.save();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.drawImage(image, 0, 0, data.width, data.height);
+                ctx.restore();
+            };       
+            image.src = data.imgData;
+        };
+
+        const init = () => {            
+            // setup the socket
+            setupSocket();
+        };        
+        window.onload = init;
+            
     
     </script>
 </head>
 <body>
-
+    <canvas id="canvas" height="480" width="640">Please use an HTML 5 browser</canvas>
 </body>
 </html>
